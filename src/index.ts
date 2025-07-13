@@ -4,6 +4,7 @@ import { Sandbox } from '@e2b/code-interpreter'
 
 export const configSchema = z.object({
   debug: z.boolean().default(false).describe("Enable debug logging"),
+  E2B_API_KEY: z.string().describe("E2B API key for authentication"),
 });
 
 export default function createStatelessServer({
@@ -17,7 +18,7 @@ export default function createStatelessServer({
   });
 
   const getSandbox = async (sandboxId: string) => {
-    return await Sandbox.connect(sandboxId);
+    return await Sandbox.connect(sandboxId, { apiKey: config.E2B_API_KEY });
   };
 
   server.tool(
@@ -27,7 +28,7 @@ export default function createStatelessServer({
       timeoutMs: z.number().optional().describe("Timeout in milliseconds"),
     },
     async ({ timeoutMs }) => {
-      const sandbox = await Sandbox.create({ timeoutMs });
+      const sandbox = await Sandbox.create({ timeoutMs, apiKey: config.E2B_API_KEY });
       return {
         content: [{ type: "text", text: `Sandbox created with ID: ${sandbox.sandboxId}` }],
       };
@@ -118,6 +119,22 @@ export default function createStatelessServer({
           type: "text", 
           text: `Results: ${result.results.map(r => r.text || r.png || r.html || r.svg || r.json).join('\n')}` 
         }],
+      };
+    }
+  );
+
+  server.tool(
+    "get_sandbox_url",
+    "Get the URL for a sandbox on a specific port",
+    {
+      port: z.number().describe("Port number"),
+      sandboxId: z.string().describe("Sandbox ID"),
+    },
+    async ({ port, sandboxId }) => {
+      const sandbox = await getSandbox(sandboxId);
+      const host = sandbox.getHost(port);
+      return {
+        content: [{ type: "text", text: `https://${host}` }],
       };
     }
   );
