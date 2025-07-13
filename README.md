@@ -1,5 +1,5 @@
 # e2b-remote-mcp
-MCP Server for E2B With extensive sandbox operations, and compatible with modern online MCP Clients such as Claude, Cursor and ChatGPT.
+MCP Server for E2B Which can manage sandboxes, run command, host websites and read and write files.
 
 I wanted to give some love to E2Bs MCP server, which was very limited. This new MCP server can run commands, host servers and read and write files, critical for many use cases.
 ## Quickstart
